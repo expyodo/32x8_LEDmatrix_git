@@ -130,7 +130,14 @@ void scrollString() {
 			// フォントは行方向でスライスしたイメージで格納されているので、
 			// 上段から下段へ向けて行数分の表示を行う
 			for ( int row = 0; row < fontDotHeight; row++ ) {
+				/*
+				colShiftOut(dispCursor[row] >> 24);
+				colShiftOut(dispCursor[row] >> 16);
+				colShiftOut(dispCursor[row] >> 8);
+				colShiftOut(dispCursor[row]);
+				*/
 				totalColShiftOut(dispCursor[row]);	//	列表示パターン出力
+
 				rowShiftOut(bitMask >> row);		//	行スキャン
 
 				updateStorage(); //データ送信が終わったのでストレージへラッチ
@@ -211,13 +218,13 @@ void checkAllLED() {
 // digitalWriteのval引数がuint_8tなので、8bitずつ送信しなければならない
 //-----------------------------------------------------------------------------
 void totalColShiftOut( const uint32_t &data) {
-	int sendLimit = cursorWidth / 8; // 全送信回数 カーソルのドット幅/8
+	int sendLimit = (cursorWidth / 8) - 1; // 全送信回数 カーソルのドット幅/8
 	uint8_t targetByte = 0;		// 送信対象のデータを格納するバッファ
 
 	// 送信回数分送信処理を行う
-	for ( int sendCount = sendLimit; sendCount > 0; sendCount-- ) {
+	for ( int sendCount = sendLimit; sendCount >= 0; sendCount-- ) {
 		// 送信できるビット幅分のデータをバッファに格納
-		targetByte = data >> sendCount * 8;
+		targetByte = data >> (sendCount * 8);
 
 		// バッファ内のデータを送信
 		for ( int i = 0; i < 8; i++ ) {
@@ -226,6 +233,7 @@ void totalColShiftOut( const uint32_t &data) {
 			digitalWrite(shiftClk, HIGH);
 		}
 	}
+
 }
 
 //-----------------------------------------------------------------------------
@@ -316,6 +324,16 @@ void disableOutput() {
 	digitalWrite(outputEnable, HIGH);
 }
 
+//-----------------------------------------------------------------------------
+// デバッグ用データ出力
+//-----------------------------------------------------------------------------
+void debugOut ( const uint8_t &data ) {
+	for ( int i = 0; i < 8; i++ ) {
+		Serial.print (data & bitMask >> i?1:0 );
+	}
+	Serial.print("\t");
+}
+
 //*****************************************************************************
 // 初期処理
 //*****************************************************************************
@@ -346,7 +364,7 @@ void setup()
 	Serial.begin(9600);
 
 	//初期表示文字列の返還後フォント列を取得
-	getFontToBuffer("  　　春はあけぼの。やうやう白くなりゆく、山ぎはすこしあかりて、むらさきだちたる雲のほそくたなびきたる。");
+	getFontToBuffer("  　　春はあけぼの。やうやう白くなりゆく、山ぎはすこしあかりて、むらさきだちたる雲のほそくたなびきたる。夏は夜。月の頃はさらなり、やみもなほ、ほたるの多く飛びちがひたる。また、ただ一つ二つなど、ほのかにうち光りて行くもをかし。雨など降るもをかし。");
 
 }
 

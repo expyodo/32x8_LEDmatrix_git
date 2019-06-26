@@ -44,7 +44,7 @@
 		<link>
 			<name>libraries/misakiUTF16</name>
 			<type>2</type>
-			<location>D:/misakiUTF16</location>
+			<location>C:/Program Files (x86)/Arduino/libraries/misakiUTF16</location>
 		</link>
 	</linkedResources>
 </projectDescription>
